@@ -4115,10 +4115,9 @@ dotenv@^10.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
-dotting@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/dotting/-/dotting-1.1.6.tgz#1063bc9813b63ce27d78c9ea031a33594f957e76"
-  integrity sha512-iCUbRTvEiBYuv/HcGmtU0SpWdT/bGmh2sIvZQlXVek+UWkVVWdyqMtXobRkcVey7Oj9of6UZ8YZBYGOvEKyg8g==
+"dotting@link:../dotting":
+  version "0.0.0"
+  uid ""
 
 draco3d@^1.4.1:
   version "1.5.6"
