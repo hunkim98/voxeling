@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import React, { useRef, useState } from "react";
+import { Canvas, ThreeElements, useFrame } from "@react-three/fiber";
+import { Dotting } from "dotting";
+
+function Box(props: ThreeElements["mesh"]) {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const [hovered, setHover] = useState(false);
+  const [active, setActive] = useState(false);
+  // useFrame((state, delta) => (meshRef.current.rotation.x += delta));
+  return (
+    <mesh
+      {...props}
+      ref={meshRef}
+      scale={active ? 1.5 : 1}
+      onClick={(event) => setActive(!active)}
+      onPointerOver={(event) => setHover(true)}
+      onPointerOut={(event) => setHover(false)}
+    >
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color={hovered ? "hotpink" : "orange"} />
+    </mesh>
+  );
+}
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="w-screen h-screen">
+      <div className="absolute bottom-0">
+        <Dotting
+          width={300}
+          height={300}
+          style={{ border: 0 }}
+          backgroundColor="#dddddd"
+          backgroundMode="color"
+        />
+      </div>
+      <Canvas>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Box position={[-1.2, 0, 0]} />
+        <Box position={[1.2, 0, 0]} />
+      </Canvas>
     </div>
   );
 }
