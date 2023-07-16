@@ -186,13 +186,9 @@ function App() {
                             selectedPlaneIndex={selectedPlaneIndex}
                             key={i + "-" + dot.rowIndex + "-" + dot.columnIndex}
                             position={[
-                              dot.columnIndex +
-                                floorData.indices.leftColumnIndex +
-                                0.5,
+                              dot.columnIndex + 0.5,
                               i,
-                              dot.rowIndex +
-                                floorData.indices.topRowIndex +
-                                0.5,
+                              dot.rowIndex + 0.5,
                             ]}
                           />
                         );
@@ -226,9 +222,9 @@ function App() {
                           dot.columnIndex
                         }
                         position={[
-                          dot.columnIndex + indices.leftColumnIndex + 0.5,
+                          dot.columnIndex + 0.5,
                           selectedPlaneIndex,
-                          dot.rowIndex + indices.topRowIndex + 0.5,
+                          dot.rowIndex + 0.5,
                         ]}
                       />
                     );
