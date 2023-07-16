@@ -1,31 +1,24 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Canvas, ThreeElements } from "@react-three/fiber";
-import { Dotting, DottingRef } from "dotting";
+import { Dotting, DottingRef, useData, useDotting, useGrids } from "dotting";
 import { OrbitControls } from "@react-three/drei";
 
 function Box(props: ThreeElements["mesh"]) {
   const meshRef = useRef<THREE.Mesh>(null!);
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
   // useFrame((state, delta) => (meshRef.current.rotation.x += delta));
   return (
-    <mesh
-      {...props}
-      ref={meshRef}
-      scale={active ? 1.5 : 1}
-      onClick={(event) => setActive(!active)}
-      onPointerOver={(event) => setHover(true)}
-      onPointerOut={(event) => setHover(false)}
-    >
+    <mesh {...props} ref={meshRef}>
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? "hotpink" : "orange"} />
+      <meshStandardMaterial color={"red"} />
     </mesh>
   );
 }
 
-function Plane(props: ThreeElements["mesh"]) {
+function Plane(
+  props: ThreeElements["mesh"] & { scaleX?: number; scaleY?: number }
+) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const [hovered, setHover] = useState(false);
   const [active, setActive] = useState(false);
@@ -33,31 +26,56 @@ function Plane(props: ThreeElements["mesh"]) {
     <mesh
       {...props}
       ref={meshRef}
-      scale={active ? 1.5 : 1}
-      onClick={(event) => setActive(!active)}
+      // onClick={(event) => setActive(!active)}
       onPointerOver={(event) => setHover(true)}
       onPointerOut={(event) => setHover(false)}
     >
-      <planeGeometry args={[2, 2]} />
-      <meshStandardMaterial color="green" />
+      <planeGeometry args={[props.scaleX, props.scaleY]} />
+      <meshStandardMaterial color={active ? "orange" : "grey"} />
     </mesh>
   );
 }
 
 function App() {
   const dottingRef = useRef<DottingRef>(null!);
+  useDotting(dottingRef);
+  const [isPlaneVisible, setIsPlaneVisible] = useState(true);
+
+  const { dimensions } = useGrids(dottingRef);
+  const { dataArray } = useData(dottingRef);
+
   return (
     <div className="w-screen h-screen">
       <Canvas>
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Plane
-          position={[0, -0.5, 0]}
-          rotation={[Math.PI * -0.5, 0, 0]}
-          scale={[1, 1, 1]}
-        />
-        <Box position={[1.2, 0, 0]} />
+        <group visible={isPlaneVisible}>
+          <Plane
+            position={[0, -0.5, 0]}
+            rotation={[Math.PI * -0.5, 0, 0]}
+            scaleX={dimensions.columnCount}
+            scaleY={dimensions.rowCount}
+          />
+        </group>
+        <group>
+          {dataArray.map((row, i) => {
+            return row.map((dot, j) => {
+              if (dot.color !== "") {
+                return (
+                  <Box
+                    position={[
+                      j - dimensions.columnCount / 2 + 0.5,
+                      0,
+                      i - dimensions.rowCount / 2 + 0.5,
+                    ]}
+                  />
+                );
+              } else {
+                return null;
+              }
+            });
+          })}
+        </group>
         <OrbitControls />
       </Canvas>
       <div className="absolute bottom-0">
@@ -71,6 +89,14 @@ function App() {
             backgroundMode="color"
           />
         </div>
+      </div>
+      <div className="absolute top-0 w-full flex justify-center mt-3">
+        <button
+          className="rounded-md border-gray-400 border-2 px-3 py-2 border-solid"
+          onClick={() => setIsPlaneVisible(!isPlaneVisible)}
+        >
+          Hide Guide Planes
+        </button>
       </div>
     </div>
   );
