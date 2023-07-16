@@ -31,7 +31,11 @@ function Plane(
       onPointerOut={(event) => setHover(false)}
     >
       <planeGeometry args={[props.scaleX, props.scaleY]} />
-      <meshStandardMaterial color={active ? "orange" : "grey"} />
+      <meshStandardMaterial
+        color={active ? "orange" : "grey"}
+        opacity={0.3}
+        transparent
+      />
     </mesh>
   );
 }
@@ -56,6 +60,12 @@ function App() {
             scaleX={dimensions.columnCount}
             scaleY={dimensions.rowCount}
           />
+          <Plane
+            position={[0, 0.51, 0]}
+            rotation={[Math.PI * -0.5, 0, 0]}
+            scaleX={dimensions.columnCount}
+            scaleY={dimensions.rowCount}
+          />
         </group>
         <group>
           {dataArray.map((row, i) => {
@@ -63,6 +73,7 @@ function App() {
               if (dot.color !== "") {
                 return (
                   <Box
+                    key={dot.rowIndex + "-" + dot.columnIndex}
                     position={[
                       j - dimensions.columnCount / 2 + 0.5,
                       0,
