@@ -14,37 +14,8 @@ import {
 import { OrbitControls } from "@react-three/drei";
 import Plane from "components/Plane";
 import Box from "components/Box";
-
-const DefaultDottingDataArray = [
-  [
-    { rowIndex: 0, columnIndex: 0, color: "" },
-    { rowIndex: 0, columnIndex: 1, color: "" },
-    { rowIndex: 0, columnIndex: 2, color: "" },
-    { rowIndex: 0, columnIndex: 3, color: "" },
-    { rowIndex: 0, columnIndex: 4, color: "" },
-  ],
-  [
-    { rowIndex: 1, columnIndex: 0, color: "" },
-    { rowIndex: 1, columnIndex: 1, color: "" },
-    { rowIndex: 1, columnIndex: 2, color: "" },
-    { rowIndex: 1, columnIndex: 3, color: "" },
-    { rowIndex: 1, columnIndex: 4, color: "" },
-  ],
-  [
-    { rowIndex: 2, columnIndex: 0, color: "" },
-    { rowIndex: 2, columnIndex: 1, color: "" },
-    { rowIndex: 2, columnIndex: 2, color: "" },
-    { rowIndex: 2, columnIndex: 3, color: "" },
-    { rowIndex: 2, columnIndex: 4, color: "" },
-  ],
-  [
-    { rowIndex: 3, columnIndex: 0, color: "" },
-    { rowIndex: 3, columnIndex: 1, color: "" },
-    { rowIndex: 3, columnIndex: 2, color: "" },
-    { rowIndex: 3, columnIndex: 3, color: "" },
-    { rowIndex: 3, columnIndex: 4, color: "" },
-  ],
-];
+import Layers from "components/Layers";
+import { DefaultLayerData } from "utils/config";
 
 function App() {
   const dottingRef = useRef<DottingRef>(null!);
@@ -64,15 +35,18 @@ function App() {
         leftColumnIndex: number;
         topRowIndex: number;
       };
+      id: number;
     }>
   >([
     {
-      data: DefaultDottingDataArray,
+      data: DefaultLayerData,
       indices: { leftColumnIndex: 0, topRowIndex: 0 },
+      id: 0,
     },
     {
-      data: DefaultDottingDataArray,
+      data: DefaultLayerData,
       indices: { leftColumnIndex: 0, topRowIndex: 0 },
+      id: 1,
     },
   ]);
 
@@ -111,7 +85,6 @@ function App() {
             };
           } else {
             if (i === selectedPlaneIndex) {
-              console.log("found identical", floorData.data);
               setData(floorData.data);
             }
             return floorData;
@@ -237,6 +210,7 @@ function App() {
           })}
         <OrbitControls target={[0, 0, 0]} />
       </Canvas>
+
       <div className="absolute bottom-0">
         <div className="relative flex flex-col w-[300px] h-[300px] rounded-md overflow-hidden ml-3 mb-3">
           <Dotting
@@ -255,6 +229,15 @@ function App() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="absolute top-[50%] left-0 w-10 translate-y-[-50%] px-3 py-2">
+        <Layers
+          floorDatas={floorDatas}
+          setFloorDatas={setFloorDatas}
+          setSelectedPlaneIndex={setSelectedPlaneIndex}
+          selectedPlaneIndex={selectedPlaneIndex}
+        />
       </div>
       <div className="absolute top-0 w-full flex justify-center mt-3">
         <button
