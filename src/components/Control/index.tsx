@@ -2,8 +2,11 @@ import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { PixelModifyItem } from "dotting";
 import React, { useEffect, useRef, useState } from "react";
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { setRotationByAxis } from "utils/anlge";
+
+//https://discourse.threejs.org/t/is-there-a-way-to-set-azimuth-and-polar-angles-for-orbitcontrols/14069/5
 
 interface Props {
   selectedPlaneIndex: number | null;
@@ -18,7 +21,7 @@ interface Props {
 }
 
 function Control({ selectedPlaneIndex, floorDatas }: Props) {
-  const { camera, controls } = useThree();
+  const { camera, controls, scene } = useThree();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
   const [cameraDirection, setCameraDirection] = useState<Vector3>(
     new Vector3()
@@ -37,32 +40,31 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
       const skewToBottom = topRowIndex + rowLength / 2;
       // camera.position.lerp()
       camera.position.lerp(new Vector3(skewToRight, 10, skewToBottom), 0.1);
+
+      // camera.applyQuaternion(new Quaternion(0, 0, 0, 1));
       // camera.lookAt(skewToRight, 0, 0);
       // position is object's local position
       if (orbitControlsRef.current) {
+        orbitControlsRef.current.enabled = true;
         orbitControlsRef.current.target.lerp(
           new Vector3(skewToRight, 0, skewToBottom),
           0.1
         );
-        orbitControlsRef.current.update();
+        orbitControlsRef.current.setAzimuthalAngle(0);
       }
     }
   });
-  // useEffect(() => {
-  //   const vector = new Vector3();
-  //   camera.getWorldDirection(vector);
-  //   setCameraDirection(vector);
-  //   if (selectedPlaneIndex !== null) {
-  //     // camera.lookAt(0, 0, 0);
-  //     if (orbitControlsRef.current) {
-  //       orbitControlsRef.current.update();
-  //     }
-  //   }
-  //   // camera.updateMatrixWorld();
-  //   console.log(camera.position);
-  //   // camera.position.lerp(new Vector3(0, 0, 0), 0.1);
-  //   // camera.position.set(0, camera.position.y, camera.position.z);
-  // }, [selectedPlaneIndex, camera, controls]);
+
+  useEffect(() => {
+    if (!orbitControlsRef.current) {
+      return;
+    }
+    if (selectedPlaneIndex !== null) {
+      orbitControlsRef.current.enableRotate = false;
+    } else {
+      orbitControlsRef.current.enableRotate = true;
+    }
+  }, [orbitControlsRef, selectedPlaneIndex, scene]);
   return <OrbitControls ref={orbitControlsRef} target={[0, 0, 0]} />;
 }
 
