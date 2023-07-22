@@ -10,17 +10,20 @@ import {
   useDotting,
   useGrids,
   GridIndices,
+  useHandlers,
 } from "dotting";
 import { OrbitControls } from "@react-three/drei";
 import Plane from "components/Plane";
 import Box from "components/Box";
 import Layers from "components/Layers";
 import { DefaultLayerData } from "utils/config";
+import Control from "components/Control";
 
 function App() {
   const dottingRef = useRef<DottingRef>(null!);
   const { setData } = useDotting(dottingRef);
-  useDotting(dottingRef);
+  const { addHoverPixelChangeListener, removeHoverPixelChangeListener } =
+    useHandlers(dottingRef);
   const [isPlaneVisible, setIsPlaneVisible] = useState(true);
   const [selectedPlaneIndex, setSelectedPlaneIndex] = useState<null | number>(
     null
@@ -52,6 +55,11 @@ function App() {
 
   const { dimensions, indices } = useGrids(dottingRef);
   const { dataArray } = useData(dottingRef);
+
+  useEffect(() => {
+    if (selectedPlaneIndex !== null) {
+    }
+  }, [addHoverPixelChangeListener, removeHoverPixelChangeListener]);
 
   useEffect(() => {
     if (previousSelectedPlaneIndex !== selectedPlaneIndex) {
@@ -179,7 +187,7 @@ function App() {
           dataArray.map((row, i) => {
             return (
               // this is for temporary purposes
-              <group>
+              <group key={i}>
                 {row.map((dot, j) => {
                   if (dot.color !== "") {
                     return (
@@ -208,7 +216,12 @@ function App() {
               </group>
             );
           })}
-        <OrbitControls target={[0, 0, 0]} />
+        <Control
+          selectedPlaneIndex={selectedPlaneIndex}
+          floorDatas={floorDatas}
+        />
+        {/* x is red, y is green, z is blue */}
+        <axesHelper args={[5]} />
       </Canvas>
 
       <div className="absolute bottom-0">
