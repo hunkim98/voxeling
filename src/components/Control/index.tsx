@@ -29,12 +29,13 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
   const [cameraDirection, setCameraDirection] = useState<Vector3>(
     new Vector3()
   );
+  const bottomOrientationRef = useRef<0 | 1 | 2 | 3 | null>(null); // we will apply bitwise operation to this value
   useEffect(() => {
     // camera.position.set(0, 5, 0);
   }, [camera]);
   useFrame((state, delta) => {
     // state.camera.position.set(0, 1, state.camera.position.z);
-    if (selectedPlaneIndex !== null) {
+    if (selectedPlaneIndex !== null && bottomOrientationRef.current !== null) {
       const { indices, data } = floorDatas[selectedPlaneIndex];
       const columnLength = data[0].length;
       const rowLength = data.length;
@@ -53,7 +54,10 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
           new Vector3(skewToRight, 0, skewToBottom),
           0.1
         );
-        orbitControlsRef.current.setAzimuthalAngle(0);
+        console.log(bottomOrientationRef.current);
+        orbitControlsRef.current.setAzimuthalAngle(
+          (bottomOrientationRef.current * Math.PI) / 2
+        );
       } else {
       }
     }
@@ -63,32 +67,48 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
     if (!orbitControlsRef.current) {
       return;
     }
-    const planeVector1 = new Vector3(1, 0, 0);
-    const planeVector2 = new Vector3(0, 0, 1);
-    const cameraDirection = new Vector3();
-    camera.getWorldDirection(cameraDirection);
-    const projectedVector = projectVector3On2DPlane({
-      planeVector1,
-      planeVector2,
-      vectorToProject: cameraDirection,
-    });
-    const compareVector = new Vector3(0, 0, -1);
-    const angle = projectedVector.angleTo(compareVector);
-    const polarCoordinateX = Math.cos(angle + Math.PI / 4);
-    const polarCoordinateY = Math.sin(angle + Math.PI / 4);
-    if (polarCoordinateX >= 0 && polarCoordinateY >= 0) {
-      console.log("bottom down");
-    } else if (polarCoordinateX < 0 && polarCoordinateY >= 0) {
-      console.log("right down");
-    } else if (polarCoordinateX < 0 && polarCoordinateY < 0) {
-      console.log("top down");
-    } else if (polarCoordinateX >= 0 && polarCoordinateY < 0) {
-      console.log("left down");
-    }
+
     if (selectedPlaneIndex !== null) {
+      const planeVector1 = new Vector3(1, 0, 0);
+      const planeVector2 = new Vector3(0, 0, 1);
+      const cameraDirection = new Vector3();
+      camera.getWorldDirection(cameraDirection);
+      const projectedVector = projectVector3On2DPlane({
+        planeVector1,
+        planeVector2,
+        vectorToProject: cameraDirection,
+      });
+      const compareVector = new Vector3(0, 0, -1);
+      const cos =
+        projectedVector.dot(compareVector) /
+        (projectedVector.length() * compareVector.length());
+      const orientation =
+        compareVector.x * projectedVector.z -
+        compareVector.z * projectedVector.x;
+
+      const angle = Math.acos(cos);
+      // const angle = projectedVector.angleTo(compareVector);
+      const correctedAngle = orientation > 0 ? 2 * Math.PI - angle : angle;
+      // const degree = (correctedAngle * 180) / Math.PI;
+      const polarCoordinateX = Math.cos(correctedAngle + Math.PI / 4);
+      const polarCoordinateY = Math.sin(correctedAngle + Math.PI / 4);
+      if (polarCoordinateX >= 0 && polarCoordinateY >= 0) {
+        // console.log("bottom down");
+        bottomOrientationRef.current = 0;
+      } else if (polarCoordinateX < 0 && polarCoordinateY >= 0) {
+        // console.log("right down");
+        bottomOrientationRef.current = 1;
+      } else if (polarCoordinateX < 0 && polarCoordinateY < 0) {
+        // console.log("top down");
+        bottomOrientationRef.current = 2;
+      } else if (polarCoordinateX >= 0 && polarCoordinateY < 0) {
+        // console.log("left down");
+        bottomOrientationRef.current = 3;
+      }
       orbitControlsRef.current.enableRotate = false;
     } else {
       orbitControlsRef.current.enableRotate = true;
+      bottomOrientationRef.current = null;
     }
   }, [orbitControlsRef, selectedPlaneIndex, scene, camera]);
   return <OrbitControls ref={orbitControlsRef} target={[0, 0, 0]} />;
