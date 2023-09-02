@@ -232,7 +232,6 @@ function App() {
             height={"100%"}
             style={{ border: 0 }}
             backgroundColor="#dddddd"
-            backgroundMode="color"
           />
           {selectedPlaneIndex === null && (
             <div className="absolute w-full h-full bg-gray-200">
