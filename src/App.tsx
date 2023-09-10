@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Canvas, ThreeElements, useThree } from "@react-three/fiber";
 import {
   Dotting,
@@ -19,12 +19,18 @@ import Layers from "components/Layers";
 import { DefaultLayerData } from "utils/config";
 import Control from "components/Control";
 import { Raycaster } from "three";
+import { ViewContext } from "context/ViewContext";
+import {
+  rotateMatrixClockwiseBy,
+  rotateMatrixCounterClockwiseBy,
+} from "utils/matrix/rotate";
 
 // https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_voxelpainter.html
 
 function App() {
   const dottingRef = useRef<DottingRef>(null!);
   const { setData } = useDotting(dottingRef);
+  const { cameraViewingFrom } = useContext(ViewContext);
   const { addHoverPixelChangeListener, removeHoverPixelChangeListener } =
     useHandlers(dottingRef);
   const [isPlaneVisible, setIsPlaneVisible] = useState(true);
@@ -77,14 +83,17 @@ function App() {
   // when the user clicks on a plane,
   // we want to transfer dotting data into floorDatas
   useEffect(() => {
-    // if (previousSelectedPlaneIndex === null) return;
     if (previousSelectedPlaneIndex !== selectedPlaneIndex) {
       const modifiedData = dataArray.slice();
+
       if (!modifiedData[0] || !modifiedData[0][0]) return;
-      const leftColumnIndex = modifiedData[0][0].columnIndex;
-      const topRowIndex = modifiedData[0][0].rowIndex;
+
+      let leftColumnIndex = modifiedData[0][0].columnIndex;
+      let topRowIndex = modifiedData[0][0].rowIndex;
+
       setFloorDatas((prev) => {
-        return prev.map((floorData, i) => {
+        const floorData = prev.map((floorData, i) => {
+          // we first store the modified data to our floor data
           if (i === previousSelectedPlaneIndex) {
             return {
               ...floorData,
@@ -101,6 +110,7 @@ function App() {
             return floorData;
           }
         });
+        return floorData;
       });
     }
   }, [
@@ -109,6 +119,7 @@ function App() {
     setFloorDatas,
     selectedPlaneIndex,
     setData,
+    cameraViewingFrom,
   ]);
 
   return (
@@ -228,7 +239,13 @@ function App() {
       </Canvas>
 
       <div className="absolute bottom-0">
-        <div className="relative flex flex-col w-[300px] h-[300px] rounded-md overflow-hidden ml-3 mb-3">
+        <div
+          className={`relative ${
+            cameraViewingFrom.cameraRotateDegree === 270
+              ? "-rotate-90"
+              : `rotate-${cameraViewingFrom.cameraRotateDegree}`
+          } flex flex-col w-[300px] h-[300px] rounded-md overflow-hidden ml-3 mb-3`}
+        >
           <Dotting
             ref={dottingRef}
             width={"100%"}
@@ -237,7 +254,13 @@ function App() {
             backgroundColor="#dddddd"
           />
           {selectedPlaneIndex === null && (
-            <div className="absolute w-full h-full bg-gray-200">
+            <div
+              className={`absolute ${
+                cameraViewingFrom.cameraRotateDegree === 270
+                  ? "rotate-90"
+                  : `-rotate-${cameraViewingFrom.cameraRotateDegree}`
+              } w-full h-full bg-gray-200`}
+            >
               <div className="absolute w-[150px] text-center m-auto left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
                 Please select a plane to edit
               </div>

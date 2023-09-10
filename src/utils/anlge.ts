@@ -14,3 +14,7 @@ export const setRotationByAxis = (
   q.z = vector.z * s;
   q.w = Math.cos(halfAngle);
 };
+
+export const radToDeg = (rad: number) => {
+  return rad * (180 / Math.PI);
+};

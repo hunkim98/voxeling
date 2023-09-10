@@ -1,7 +1,7 @@
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { PixelModifyItem } from "dotting";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Matrix3,
   Quaternion,
@@ -13,6 +13,8 @@ import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { setRotationByAxis } from "utils/anlge";
 import * as ML from "ml-matrix";
 import { projectVector3On2DPlane } from "utils/projection";
+import { radToDeg } from "three/src/math/MathUtils";
+import { ViewContext } from "context/ViewContext";
 
 //https://discourse.threejs.org/t/is-there-a-way-to-set-azimuth-and-polar-angles-for-orbitcontrols/14069/5
 
@@ -33,6 +35,7 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
   const bottomOrientationRef = useRef<0 | 1 | 2 | 3 | null>(null); // we will apply bitwise operation to this value
   const rayCaster = useRef<Raycaster>(new Raycaster());
+  const { setCameraViewingFrom } = useContext(ViewContext);
   useEffect(() => {
     // camera.position.set(0, 5, 0);
     const onMouseDown = (event: MouseEvent) => {
@@ -44,14 +47,12 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
       } as THREE.Vector2;
       rayCaster.current.setFromCamera(mousePos, camera);
       const intersects = rayCaster.current.intersectObjects(scene.children);
-      console.log(intersects.map((intersect) => intersect.object.type));
       if (intersects.length > 0) {
         const intersect = intersects[0];
         const { object } = intersect;
         if (object.type === "AxesHelper") {
           return;
         } else {
-          console.log(object);
         }
         const { name } = object;
         if (name === "plane") {
@@ -131,6 +132,10 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
           orbitControlTargetLerp.set(skewToRight, 0, skewToBottom),
           0.1
         );
+        console.log(
+          radToDeg((bottomOrientationRef.current * Math.PI) / 2),
+          "rotaion"
+        );
         orbitControlsRef.current.setAzimuthalAngle(
           (bottomOrientationRef.current * Math.PI) / 2
         );
@@ -171,22 +176,45 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
       if (polarCoordinateX >= 0 && polarCoordinateY >= 0) {
         // console.log("bottom down");
         bottomOrientationRef.current = 0;
+        setCameraViewingFrom((prev) => ({
+          viewingFrom: prev.viewingFrom,
+          cameraRotateDegree: 0,
+        }));
       } else if (polarCoordinateX < 0 && polarCoordinateY >= 0) {
         // console.log("right down");
         bottomOrientationRef.current = 1;
+        setCameraViewingFrom((prev) => ({
+          viewingFrom: prev.viewingFrom,
+          cameraRotateDegree: 90,
+        }));
       } else if (polarCoordinateX < 0 && polarCoordinateY < 0) {
         // console.log("top down");
         bottomOrientationRef.current = 2;
+        setCameraViewingFrom((prev) => ({
+          viewingFrom: prev.viewingFrom,
+          cameraRotateDegree: 180,
+        }));
       } else if (polarCoordinateX >= 0 && polarCoordinateY < 0) {
         // console.log("left down");
         bottomOrientationRef.current = 3;
+        setCameraViewingFrom((prev) => ({
+          viewingFrom: prev.viewingFrom,
+          cameraRotateDegree: 270,
+        }));
       }
       orbitControlsRef.current.enableRotate = false;
     } else {
       orbitControlsRef.current.enableRotate = true;
       bottomOrientationRef.current = null;
     }
-  }, [orbitControlsRef, selectedPlaneIndex, scene, camera]);
+  }, [
+    orbitControlsRef,
+    selectedPlaneIndex,
+    scene,
+    camera,
+    setCameraViewingFrom,
+  ]);
+
   return <OrbitControls ref={orbitControlsRef} target={[0, 0, 0]} />;
 }
 
