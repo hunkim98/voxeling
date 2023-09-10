@@ -178,6 +178,11 @@ function App() {
                         return (
                           <Box
                             planeIndex={i}
+                            userData={{
+                              floorIdx: i,
+                              columnIndex: dot.columnIndex,
+                              rowIndex: dot.rowIndex,
+                            }}
                             selectedPlaneIndex={selectedPlaneIndex}
                             key={i + "-" + dot.rowIndex + "-" + dot.columnIndex}
                             position={[
@@ -206,6 +211,11 @@ function App() {
                   if (dot.color !== "") {
                     return (
                       <Box
+                        userData={{
+                          floorIdx: selectedPlaneIndex,
+                          columnIndex: dot.columnIndex,
+                          rowIndex: dot.rowIndex,
+                        }}
                         planeIndex={selectedPlaneIndex}
                         selectedPlaneIndex={selectedPlaneIndex}
                         key={
@@ -232,6 +242,7 @@ function App() {
           })}
         <Control
           selectedPlaneIndex={selectedPlaneIndex}
+          setSelectedPlaneIndex={setSelectedPlaneIndex}
           floorDatas={floorDatas}
         />
         {/* x is red, y is green, z is blue */}

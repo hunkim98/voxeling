@@ -15,11 +15,13 @@ import * as ML from "ml-matrix";
 import { projectVector3On2DPlane } from "utils/projection";
 import { radToDeg } from "three/src/math/MathUtils";
 import { ViewContext } from "context/ViewContext";
+import { setSelectionRange } from "@testing-library/user-event/dist/utils";
 
 //https://discourse.threejs.org/t/is-there-a-way-to-set-azimuth-and-polar-angles-for-orbitcontrols/14069/5
 
 interface Props {
   selectedPlaneIndex: number | null;
+  setSelectedPlaneIndex: React.Dispatch<React.SetStateAction<number | null>>;
   floorDatas: Array<{
     data: Array<Array<PixelModifyItem>>;
     indices: {
@@ -30,7 +32,11 @@ interface Props {
   }>;
 }
 
-function Control({ selectedPlaneIndex, floorDatas }: Props) {
+function Control({
+  selectedPlaneIndex,
+  floorDatas,
+  setSelectedPlaneIndex,
+}: Props) {
   const { camera, controls, scene, gl } = useThree();
   const orbitControlsRef = useRef<OrbitControlsImpl>(null);
   const bottomOrientationRef = useRef<0 | 1 | 2 | 3 | null>(null); // we will apply bitwise operation to this value
@@ -50,6 +56,7 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
       if (intersects.length > 0) {
         const intersect = intersects[0];
         const { object } = intersect;
+        console.log(intersects.map((intersect) => intersect.object.userData));
         if (object.type === "AxesHelper") {
           return;
         } else {
@@ -82,7 +89,7 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
     return () => {
       gl.domElement.removeEventListener("mousedown", onMouseDown);
     };
-  }, []);
+  }, [setSelectedPlaneIndex]);
   const floorData = useRef<{
     data: Array<Array<PixelModifyItem>>;
     indices: {
@@ -132,10 +139,7 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
           orbitControlTargetLerp.set(skewToRight, 0, skewToBottom),
           0.1
         );
-        console.log(
-          radToDeg((bottomOrientationRef.current * Math.PI) / 2),
-          "rotaion"
-        );
+
         orbitControlsRef.current.setAzimuthalAngle(
           (bottomOrientationRef.current * Math.PI) / 2
         );
@@ -174,7 +178,6 @@ function Control({ selectedPlaneIndex, floorDatas }: Props) {
       const polarCoordinateX = Math.cos(correctedAngle + Math.PI / 4);
       const polarCoordinateY = Math.sin(correctedAngle + Math.PI / 4);
       if (polarCoordinateX >= 0 && polarCoordinateY >= 0) {
-        // console.log("bottom down");
         bottomOrientationRef.current = 0;
         setCameraViewingFrom((prev) => ({
           viewingFrom: prev.viewingFrom,
