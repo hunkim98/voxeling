@@ -12,7 +12,7 @@
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "dotting": "^2.0.1",
+    "dotting": "^2.0.5",
     "ml-matrix": "^6.10.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

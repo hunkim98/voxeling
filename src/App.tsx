@@ -1,7 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
 import React, { useEffect, useRef, useState } from "react";
-import { Canvas, ThreeElements } from "@react-three/fiber";
+import { Canvas, ThreeElements, useThree } from "@react-three/fiber";
 import {
   Dotting,
   DottingRef,
@@ -18,6 +18,9 @@ import Box from "components/Box";
 import Layers from "components/Layers";
 import { DefaultLayerData } from "utils/config";
 import Control from "components/Control";
+import { Raycaster } from "three";
+
+// https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_voxelpainter.html
 
 function App() {
   const dottingRef = useRef<DottingRef>(null!);
@@ -110,7 +113,7 @@ function App() {
 
   return (
     <div className="w-screen h-screen">
-      <Canvas>
+      <Canvas frameloop="demand">
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         <group visible={isPlaneVisible}>
