@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/voxeling/static/css/main.0636ebf1.css",
+    "main.js": "/voxeling/static/js/main.04c1cd2d.js",
+    "static/js/787.ab6839ec.chunk.js": "/voxeling/static/js/787.ab6839ec.chunk.js",
+    "index.html": "/voxeling/index.html",
+    "main.0636ebf1.css.map": "/voxeling/static/css/main.0636ebf1.css.map",
+    "main.04c1cd2d.js.map": "/voxeling/static/js/main.04c1cd2d.js.map",
+    "787.ab6839ec.chunk.js.map": "/voxeling/static/js/787.ab6839ec.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0636ebf1.css",
+    "static/js/main.04c1cd2d.js"
+  ]
+}
